@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>双色球/大乐透开奖查询</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      padding: 20px;
+      background: #f9f9f9;
+      text-align: center;
+    }
+    h1 {
+      color: #d0021b;
+    }
+    .results {
+      margin-top: 20px;
+      text-align: left;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .draw {
+      margin-bottom: 10px;
+      padding: 10px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      background: #d0021b;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #a00116;
+    }
+    .new-number {
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>双色球/大乐透开奖查询</h1>
+
+  <div>
+    <button onclick="loadData('ssq')">加载双色球</button>
+    <button onclick="loadData('dlt')">加载大乐透</button>
+    <button onclick="loadData('kl8')">加载快8</button>
+    <button onclick="generateNumber()">生成新号码</button>
+  </div>
+
+  <div id="results" class="results"></div>
+
+  <div id="new-number" class="new-number"></div>
+
+  <script>
+    async function loadData(type) {
+      const res = await fetch(`/api/lottery?type=${type}`);
+      const data = await res.json();
+
+      const container = document.getElementById('results');
+      container.innerHTML = '';
+      data.slice(0, 10).forEach(draw => {
+        const div = document.createElement('div');
+        div.className = 'draw';
+        div.innerHTML = `<strong>${draw.date}</strong><br>号码：${draw.numbers.join(' ')}`;
+        container.appendChild(div);
+      });
+    }
+
+    function generateNumber() {
+      let redBalls = [];
+      while (redBalls.length < 6) {
+        let num = Math.floor(Math.random() * 33) + 1;
+        if (!redBalls.includes(num)) redBalls.push(num);
+      }
+      redBalls.sort((a, b) => a - b);
+      let blueBall = Math.floor(Math.random() * 16) + 1;
+
+      document.getElementById('new-number').innerText =
+        `推荐号码：红球【${redBalls.join(' ')}】蓝球【${blueBall}】`;
+    }
+  </script>
+
+</body>
+</html>
