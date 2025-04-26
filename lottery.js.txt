@@ -1,0 +1,33 @@
+import fetch from 'node-fetch';
+import { load } from 'cheerio';
+
+export default async function handler(req, res) {
+  const { type } = req.query;
+
+  let url = '';
+  if (type === 'ssq') url = 'https://www.zhcw.com/kjxx/ssq/';
+  else if (type === 'dlt') url = 'https://www.zhcw.com/kjxx/dlt/';
+  else if (type === 'kl8') url = 'https://www.zhcw.com/kl8/';
+  else return res.status(400).send('Unknown type');
+
+  try {
+    const response = await fetch(url);
+    const html = await response.text();
+    const $ = load(html);
+
+    const draws = [];
+    $('.wqhgkj_tab tbody tr').each((i, el) => {
+      const tds = $(el).find('td');
+      if (tds.length >= 2) {
+        const date = $(tds[0]).text().trim();
+        const numbers = $(tds[1]).text().trim().split(/\s+/).map(n => parseInt(n, 10));
+        draws.push({ date, numbers });
+      }
+    });
+
+    res.status(200).json(draws);
+  } catch (e) {
+    console.error(e);
+    res.status(500).send('Error fetching data');
+  }
+}
